@@ -1,0 +1,47 @@
+It seems the issue you're facing is caused by a variable scope problem in Taipy. The error message suggests that the variable `selected_scenario` could not be found in the expected context, likely due to how the variable is passed between components in the GUI.
+
+Here's a possible solution for this issue:
+
+### Possible Fix
+
+The error occurs because the variable `selected_scenario` is not being correctly resolved within the `scenario_selector` component. One way to address this issue is to ensure that the variable exists in the right context, and that the `on_change` and `on_creation` functions are properly handling the context changes.
+
+Here’s a step-by-step guide on how to modify your code to prevent this issue:
+
+1. **Ensure that `selected_scenario` is initialized**:
+   Before using the `scenario_selector`, make sure that `selected_scenario` is defined in the scope where `scenario_selector` is used. For example:
+   ```python
+   selected_scenario = None
+   ```
+
+2. **Update the scenario selector code**:
+   Make sure that `value="{selected_scenario}"` correctly binds to the variable in the correct context. Try using a state-management approach to ensure this.
+
+   Here’s a refined version of your `scenario_selector` code:
+   ```python
+   from taipy.gui import notify_change, notify_creation
+
+   selected_scenario = None
+
+   tgb.scenario_selector(
+       value="selected_scenario",  # removed the curly braces
+       show_pins=True,
+       on_change=notify_change,
+       on_creation=notify_creation,
+   )
+   ```
+
+3. **Ensure the `on_change` and `on_creation` functions handle the changes correctly**:
+   Your `notify_change` and `notify_creation` functions should correctly handle the selection and creation of scenarios:
+   ```python
+   def notify_change(var_name, value):
+       global selected_scenario
+       selected_scenario = value
+       print(f"Scenario changed: {selected_scenario}")
+
+   def notify_creation(new_scenario):
+       print(f"New scenario created: {new_scenario}")
+   ```
+
+4. **Check for Context Binding**:
+   Ensure that you are not mixing global and local context, as that may cause the `NameError`. By using direct bindings (`"selected_scenario"`), it might resolve the issue.
